@@ -12,7 +12,7 @@ RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
 COPY . .
 
-# Install Composer Dependencies
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
@@ -24,7 +24,4 @@ EXPOSE 80
 
 CMD php artisan config:clear && \
     php artisan migrate --force && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-80}
