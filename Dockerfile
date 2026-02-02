@@ -16,13 +16,15 @@ COPY . .
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# صلاحيات المجلدات
+
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
 
-CMD php artisan config:cache && \
+
+CMD php artisan config:clear && \
+    php artisan migrate --force && \
+    php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
-    php artisan migrate --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-80}
