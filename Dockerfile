@@ -1,16 +1,4 @@
-# Stage 1: Build Assets (Vue 3)
-
-FROM node:20 AS asset-builder
-WORKDIR /app
-COPY . .
-
-
-RUN npm install --legacy-peer-deps
-
-
-RUN npm run build
-
-# Stage 2: PHP Environment (Laravel)
+# PHP Environment
 FROM php:8.2-fpm
 WORKDIR /var/www
 
@@ -21,8 +9,8 @@ RUN apt-get update && apt-get install -y \
 # Install PHP Extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
-# Copy Project Files
-COPY --from=asset-builder /app /var/www
+# Copy Project Files (including the build folder you just created)
+COPY . .
 
 # Install Composer Dependencies
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
