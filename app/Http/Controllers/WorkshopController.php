@@ -39,7 +39,7 @@ class WorkshopController extends Controller
 
     public function store(Request $request)
     {
-       
+
         $validated = $request->validate([
             'title'        => 'required|string|max:255',
             'category'     => 'required|string',
@@ -129,4 +129,4 @@ class WorkshopController extends Controller
     }
 }
 
-// https://gemini.google.com/app/4d4bf4923de45292
+
