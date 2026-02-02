@@ -9,14 +9,14 @@ RUN apt-get update && apt-get install -y \
 # Install PHP Extensions
 RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
-# Copy Project Files (including the build folder you just created)
+
 COPY . .
 
 # Install Composer Dependencies
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Setup Permissions
+# صلاحيات المجلدات
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 80
