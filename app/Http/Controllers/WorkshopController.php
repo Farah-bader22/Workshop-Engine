@@ -127,6 +127,74 @@ class WorkshopController extends Controller
         }
         return Redirect::back()->with('error', 'UNAUTHORIZED');
     }
+
+    public function update(Request $request, Workshop $workshop)
+{
+    
+    if (auth()->id() !== $workshop->user_id && !auth()->user()->is_admin) {
+        return Redirect::back()->with('error', 'UNAUTHORIZED');
+    }
+
+
+    $validated = $request->validate([
+        'title'        => 'required|string|max:255',
+        'category'     => 'required|string',
+        'type'         => 'required|string|in:workshop,post',
+        'content'      => 'nullable|string',
+        'date'         => 'nullable|string',
+        'code_snippet' => 'nullable|string',
+        'image'        => 'nullable|image|max:5120',
+        'video'        => 'nullable|max:51200',
+    ]);
+
+    try {
+        $imageUrl = $workshop->image_url;
+        $videoUrl = $workshop->video_url;
+
+        if ($request->hasFile('image')) {
+
+            if ($workshop->image_url) {
+                $oldPath = public_path(ltrim($workshop->image_url, '/'));
+                if (File::exists($oldPath)) File::delete($oldPath);
+            }
+
+            $image = $request->file('image');
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('uploads/images'), $imageName);
+            $imageUrl = '/uploads/images/' . $imageName;
+        }
+
+
+        if ($request->hasFile('video')) {
+            if ($workshop->video_url) {
+                $oldVideo = public_path(ltrim($workshop->video_url, '/'));
+                if (File::exists($oldVideo)) File::delete($oldVideo);
+            }
+
+            $video = $request->file('video');
+            $videoName = time() . '_' . uniqid() . '.' . $video->getClientOriginalExtension();
+            $video->move(public_path('uploads/videos'), $videoName);
+            $videoUrl = '/uploads/videos/' . $videoName;
+        }
+
+
+        $workshop->update([
+            'title'        => strtoupper($validated['title']),
+            'category'     => $validated['category'],
+            'content'      => $validated['content'] ?? '',
+            'type'         => $validated['type'],
+            'date'         => $validated['date'] ?? $workshop->date,
+            'code_snippet' => $validated['code_snippet'] ?? null,
+            'image_url'    => $imageUrl,
+            'video_url'    => $videoUrl,
+        ]);
+
+        return Redirect::back()->with('success', 'UPDATED_SUCCESSFULLY');
+
+    } catch (\Exception $e) {
+        return Redirect::back()->with('error', "خطأ في التحديث: " . $e->getMessage());
+    }
+}
 }
 
 
